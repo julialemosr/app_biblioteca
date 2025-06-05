@@ -5,6 +5,9 @@ import requests
 from flet.core.dropdown import Option
 from flet.core.types import CrossAxisAlignment
 
+id_usuario_global = 0
+id_livro_global = 0
+id_emprestimo_global = 0
 
 def main(page: ft.Page):
     page.title = "Biblioteca"
@@ -45,7 +48,6 @@ def main(page: ft.Page):
                             Text(theme_style=ft.TextThemeStyle.TITLE_MEDIUM, value=" LIVROS: \n"),
                             ElevatedButton(text="Listar livros", bgcolor="#896d56", color="#ffffff", width=200, on_click=lambda _: page.go("/livros")),
                             ElevatedButton(text="Cadastrar livros", bgcolor="#896d56", color="#ffffff", width=200, on_click=lambda _: page.go("/novo_livro")),
-                            ElevatedButton(text="Atualizar livros", bgcolor="#896d56", color="#ffffff", width=200, on_click=lambda _: page.go("/atualizar_livro")),
                             ElevatedButton(text="Status dos livros", bgcolor="#896d56", color="#ffffff", width=200, on_click=lambda _: page.go("/status_livro")),
                     ],
                     bgcolor="#e7c18e",
@@ -66,8 +68,6 @@ def main(page: ft.Page):
                                        on_click=lambda _: page.go("/usuarios")),
                         ElevatedButton(text="Cadastrar usuários", bgcolor="#896d56", color="#ffffff", width=200,
                                        on_click=lambda _: page.go("/novo_usuario")),
-                        ElevatedButton(text="Atualizar usuários", bgcolor="#896d56", color="#ffffff", width=200,
-                                       on_click=lambda _: page.go("/atualizar_usuario")),
                     ],
                     bgcolor="#e7c18e",
                     horizontal_alignment=CrossAxisAlignment.CENTER,
@@ -172,8 +172,8 @@ def main(page: ft.Page):
                     "/detalhes_emprestimo",
                     [
                         AppBar(title=Text("INFORMAÇÕES"), bgcolor="#896d56"),
-                        txt_nome,
-                        txt_titulo,
+                        txt_id_usuario,
+                        txt_id_livro,
                         txt_data_emprestimo,
                         txt_data_devolucao,
                     ],
@@ -192,7 +192,7 @@ def main(page: ft.Page):
                             input_autor,
                             input_isbn,
                             input_resumo,
-                            ElevatedButton(text="Adicionar", on_click=lambda _: page.go("/lista"), bgcolor="#896d56",color="#ffffff", width=150),
+                            ElevatedButton(text="Salvar", on_click=lambda _: salvar_livro(e), bgcolor="#896d56",color="#ffffff", width=150),
                             ElevatedButton(text="Voltar", on_click=lambda _: page.go("/segunda"), bgcolor="#896d56",color="#ffffff", width=150)
 
                     ],
@@ -210,7 +210,7 @@ def main(page: ft.Page):
                             input_nome,
                             input_cpf,
                             input_endereco,
-                            ElevatedButton(text="Adicionar", on_click=lambda _: page.go("/lista"), bgcolor="#896d56",color="#ffffff", width=150),
+                            ElevatedButton(text="Salvar", on_click=lambda _: salvar_usuario(e) , bgcolor="#896d56",color="#ffffff", width=150),
                             ElevatedButton(text="Voltar", on_click=lambda _: page.go("/terceira"), bgcolor="#896d56",color="#ffffff", width=150)
 
                     ],
@@ -225,16 +225,75 @@ def main(page: ft.Page):
                     [
                             AppBar(title=Text("REALIZAR EMPRÉSTIMO"), bgcolor="#896d56", color= "#ffffff"),
                             Text(theme_style=ft.TextThemeStyle.TITLE_MEDIUM, value=""),
-                            titulo_livro,
-                            nomes_usuarios,
+                            input_id_livro,
+                            input_id_usuario,
                             input_data_emprestimo,
                             input_data_devolucao,
-                            ElevatedButton(text="Adicionar", on_click=lambda _: page.go("/lista"),bgcolor="#896d56", color= "#ffffff", width=150),
+                            ElevatedButton(text="Adicionar", on_click=lambda _: salvar_emprestimo(e),bgcolor="#896d56", color= "#ffffff", width=150),
                             ElevatedButton(text="Voltar", on_click=lambda _: page.go("/quarta"),bgcolor="#896d56", color= "#ffffff", width=150)
 
                     ],
                     bgcolor="#e7c18e",
                     horizontal_alignment=CrossAxisAlignment.CENTER,
+                )
+            )
+
+        if page.route == "/atualizar_livro":
+            page.views.append(
+                View(
+                    "/atualizar_livro",
+                    [
+                            AppBar(title=Text("ATUALIZAR LIVROS"), bgcolor="#896d56", color= "#ffffff"),
+                            Text(theme_style=ft.TextThemeStyle.TITLE_MEDIUM, value=""),
+                            input_titulo,
+                            input_autor,
+                            input_isbn,
+                            input_resumo,
+                            ElevatedButton(text="Salvar", on_click=lambda _: atualiza_livro(e),bgcolor="#896d56", color= "#ffffff", width=150),
+                            ElevatedButton(text="Voltar", on_click=lambda _: page.go("/segunda"),bgcolor="#896d56", color= "#ffffff", width=150)
+
+                    ],
+                    bgcolor="#e7c18e",
+                    horizontal_alignment=CrossAxisAlignment.CENTER,
+                )
+            )
+
+        if page.route == "/atualizar_usuario":
+            page.views.append(
+                View(
+                    "/atualizar_usuario",
+                    [
+                            AppBar(title=Text("ATUALIZAR USUÁRIOS"), bgcolor="#896d56", color= "#ffffff"),
+                            Text(theme_style=ft.TextThemeStyle.TITLE_MEDIUM, value=""),
+                            input_nome,
+                            input_cpf,
+                            input_endereco,
+                            ElevatedButton(text="Salvar", on_click=lambda _: atualiza_usuario(e),bgcolor="#896d56", color= "#ffffff", width=150),
+                            ElevatedButton(text="Voltar", on_click=lambda _: page.go("/terceira"),bgcolor="#896d56", color= "#ffffff", width=150)
+
+                    ],
+                    bgcolor="#e7c18e",
+                    horizontal_alignment=CrossAxisAlignment.CENTER,
+
+                )
+            )
+        if page.route == "/atualizar_emprestimos":
+            page.views.append(
+                View(
+                    "/atualizar_emprestimos",
+                    [
+                            AppBar(title=Text("ATUALIZAR EMPRÉSTIMOS"), bgcolor="#896d56", color= "#ffffff"),
+                            Text(theme_style=ft.TextThemeStyle.TITLE_MEDIUM, value=""),
+                            input_nome,
+                            input_cpf,
+                            input_endereco,
+                            ElevatedButton(text="Salvar", on_click=lambda _: atualiza_emprestimo(e),bgcolor="#896d56", color= "#ffffff", width=150),
+                            ElevatedButton(text="Voltar", on_click=lambda _: page.go("/quarta"),bgcolor="#896d56", color= "#ffffff", width=150)
+
+                    ],
+                    bgcolor="#e7c18e",
+                    horizontal_alignment=CrossAxisAlignment.CENTER,
+
                 )
             )
         page.update()
@@ -280,6 +339,18 @@ def main(page: ft.Page):
                 )
         page.update()
 
+    def lista_livros():
+        url = "http://10.135.232.24:5000/livros"
+        livros_get = requests.get(url)
+        if livros_get.status_code == 200:
+            dados_get_livros = livros_get.json()
+            return dados_get_livros
+        else:
+            print(f"Erro: {livros_get.status_code}")
+            return {
+                "erro": livros_get.json()
+            }
+
     def detalhes_livro(lista_livros):
         txt_titulo.value = lista_livros["Titulo"]
         txt_autor.value = lista_livros["Autor"]
@@ -289,20 +360,19 @@ def main(page: ft.Page):
         page.go("/detalhes_livro")
 
     def salvar_livro(e):
-        if input_nome.value == "" or input_autor.value == "" or input_isbn.value == "" or input_resumo.value == "":
+        if input_titulo.value == "" or input_autor.value == "" or input_isbn.value == "" or input_resumo.value == "":
             page.overlay.append(msg_erro1)
             msg_erro1.open = True
             page.update()
         else:
             novo_livro =  {
-                "titulo" : input_nome.value,
+                "titulo" : input_titulo.value,
                 "autor" : input_autor.value,
                 "ISBN" : int(input_isbn.value),
                 "resumo" : input_resumo.value,
             }
 
             cadastro_livros(novo_livro)
-            page.update()
 
     def lista_usuarios():
         url = "http://10.135.232.24:5000/usuarios"
@@ -359,12 +429,11 @@ def main(page: ft.Page):
             page.update()
         else:
             novo_usuario = {
-                "titulo" :input_nome.value,
-                "autor" :input_cpf.value,
-                "descricao" :input_endereco.value,
+                "nome" :input_nome.value,
+                "cpf" :input_cpf.value,
+                "endereco" :input_endereco.value,
             }
             cadastro_usuarios(novo_usuario)
-            page.update()
 
     def lista_emprestimos():
         url = "http://10.135.232.24:5000/emprestimos"
@@ -430,28 +499,9 @@ def main(page: ft.Page):
             realizar_emprestimos(novo_emprestimo)
             page.update()
 
-    def cadastro_livros():
+    def cadastro_livros(novo_livro):
         url = "http://10.135.232.24:5000/novo_livro"
-
-        if input_titulo.value == "" or input_autor.value == "" or input_isbn.value == "" or input_resumo.value == "":
-            page.overlay.append(msg_erro1)
-            msg_erro1.open = True
-            page.update()
-        else:
-            livro_novo = {
-                "Titulo": input_titulo.value,
-                "Autor": input_autor.value,
-                "ISBN": input_isbn.value,
-                "Resumo": input_resumo.value
-            }
-            input_titulo.value = ""
-            input_autor.value = ""
-            input_isbn.value = ""
-            input_resumo.value = ""
-            msg_sucesso1.open = True
-            page.update()
-
-        response_livro = requests.post(url, json=livro_novo)
+        response_livro = requests.post(url, json=novo_livro)
 
         if response_livro.status_code == 201:
             input_titulo.value = ""
@@ -459,64 +509,29 @@ def main(page: ft.Page):
             input_isbn.value = ""
             input_resumo.value = ""
             page.overlay.append(msg_sucesso1)
-            msg_sucesso1.open = False
+            msg_sucesso1.open = True
             page.update()
         else:
             page.overlay.append(msg_erro2)
 
-    def cadastro_usuarios():
+    def cadastro_usuarios(novo_usuario):
         url = "http://10.135.232.24:5000/novo_usuario"
-
-        if input_nome.value == "" or input_cpf.value == "" or input_endereco.value == "":
-            page.overlay.append(msg_erro1)
-            msg_erro1.open = True
-            page.update()
-        else:
-            usuario_novo = {
-                "Nome": input_nome.value,
-                "CPF": input_cpf.value,
-                "Endereço": input_endereco.value,
-            }
-            input_nome.value = ""
-            input_cpf.value = ""
-            input_endereco.value = ""
-            msg_sucesso3.open = True
-            page.update()
-
-        response_usuario = requests.post(url, json=usuario_novo)
+        response_usuario = requests.post(url, json=novo_usuario)
 
         if response_usuario.status_code == 201:
             input_nome.value = ""
             input_cpf.value = ""
             input_endereco.value = ""
             page.overlay.append(msg_sucesso3)
-            msg_sucesso3.open = False
+            msg_sucesso3.open = True
             page.update()
         else:
             page.overlay.append(msg_erro3)
 
-    def realizar_emprestimos():
+    def realizar_emprestimos(novo_emprestimo):
         url = "http://10.135.232.24:5000/realizar_emprestimo"
 
-        if input_id_usuario.value == "" or input_id_livro.value == "" or input_data_emprestimo.value == "" or input_data_devolucao.value == "":
-            page.overlay.append(msg_erro1)
-            msg_erro1.open = True
-            page.update()
-        else:
-            emprestimo_novo = {
-                "Id do usuário": input_id_usuario.value,
-                "Id do livro": input_id_livro.value,
-                "Data de empréstimo": input_data_emprestimo.value,
-                "Data de devolução": input_data_devolucao.value,
-            }
-            input_id_usuario.value = ""
-            input_id_livro.value = ""
-            input_data_emprestimo.value = ""
-            input_data_devolucao.value = ""
-            msg_sucesso5.open = True
-            page.update()
-
-        response_emprestimo = requests.post(url, json=emprestimo_novo)
+        response_emprestimo = requests.post(url, json=novo_emprestimo)
 
         if response_emprestimo.status_code == 200:
             input_id_usuario.value = ""
@@ -529,40 +544,62 @@ def main(page: ft.Page):
         else:
             page.overlay.append(msg_erro4)
 
-    def atualiza_livro(id_livro):
-        url = f"http://10.135.232.24:5000/atualizar_livro/{id_livro}"
-        editar_livro = {
-            "id": id_livro,
+    def atualiza_livro(e):
+        global id_livro_global
+        url = f"http://10.135.232.24:5000/atualizar_livro/{id_livro_global}"
+
+        novo_livro = {
             "titulo": input_titulo.value,
             "autor": input_autor.value,
-            "isbn": input_isbn.value,
+            "isbn": int(input_isbn.value),
             "resumo": input_resumo.value
         }
+        response_put = requests.put(url, json=novo_livro)
 
-        response_put = requests.put(url, json=editar_livro)
         if response_put.status_code == 200:
-            page.overlay.append(msg_sucesso2)
-            msg_sucesso2.open = False
+            page.go("/lista_livros")
             page.update()
         else:
-            page.overlay.append(msg_erro5)
+            return {
+                'error': livros.json()
+            }
 
-    def atualiza_usuario(id_usuario):
-        url = f"http://10.135.232.24:5000/atualizar_usuario/{id_usuario}"
-        editar_usuario = {
-            "id": id_usuario,
+    def atualiza_usuario(e):
+        global id_usuario_global
+        url = f"http://10.135.232.24:5000/atualizar_usuario/{id_usuario_global}"
+        novo_usuario = {
             "Nome": input_nome.value,
             "CPF": input_cpf.value,
             "Endereço": input_endereco.value,
         }
 
-        response_put = requests.put(url, json=editar_usuario)
+        response_put = requests.put(url, json=novo_usuario)
         if response_put.status_code == 200:
-            page.overlay.append(msg_sucesso4)
-            msg_sucesso4.open = False
+            page.go("/lista_usuarios")
             page.update()
         else:
-            page.overlay.append(msg_erro6)
+            return {
+                'error': usuarios.json()
+            }
+
+    def atualiza_emprestimo(e):
+        global id_emprestimo_global
+        url = f"http://10.135.232.24:5000/atualizar_emprestimos/{id_emprestimo_global}"
+        novo_emprestimo = {
+            "id_livro": input_id_livro.value,
+            "id_usuario": input_id_usuario.value,
+            "data_devolucao": input_data_devolucao.value,
+            "data_emprestimo": input_data_emprestimo.value,
+        }
+
+        response_put = requests.put(url, json=novo_emprestimo)
+        if response_put.status_code == 200:
+            page.go("/lista_emprestimos")
+            page.update()
+        else:
+            return {
+                'error': emprestimos.json()
+            }
 
     def status_livro():
         url = "http://10.135.232.24:5000/livro_status"
@@ -605,9 +642,10 @@ def main(page: ft.Page):
     txt_isbn = ft.Text()
     txt_resumo = ft.Text()
 
-    input_nome = ft.TextField(label="Nome")
-    input_cpf = ft.TextField(label="CPF")
-    input_endereco = ft.TextField(label="endereco")
+    input_nome = ft.TextField(label="Nome", hint_text="Digite o nome")
+    input_cpf = ft.TextField(label="CPF", hint_text="Digite o CPF")
+    input_endereco = ft.TextField(label="endereco", hint_text="Digite o endereco")
+
     lv_usuario = ft.ListView(
         height=500,
     )
@@ -616,10 +654,10 @@ def main(page: ft.Page):
     txt_cpf = ft.Text()
     txt_endereco = ft.Text()
 
-    input_id_usuario = ft.TextField(label="id_usuario")
-    input_id_livro = ft.TextField(label="id_livro")
-    input_data_emprestimo = ft.TextField(label="data_emprestimo")
-    input_data_devolucao = ft.TextField(label="data_devolucao")
+    input_id_usuario = ft.TextField(label="id_usuario", hint_text="Digite o id do usuario")
+    input_id_livro = ft.TextField(label="id_livro", hint_text="Digite o id do livro")
+    input_data_emprestimo = ft.TextField(label="data_emprestimo", hint_text="Digite o data do emprestimo")
+    input_data_devolucao = ft.TextField(label="data_devolucao", hint_text="Digite o data do devolucao")
     titulo_livro = ft.Dropdown(
         label='Titulo dos livros',
         bgcolor="#896d56",
@@ -672,3 +710,10 @@ def main(page: ft.Page):
     page.go(page.route)
 
 ft.app(main)
+
+# arrumar options
+# listar emprestimo(nomes pelo id)
+# status
+# historico
+# arrumar cadastrar emprest imo e usuario
+# termina/r atualizar
