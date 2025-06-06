@@ -2,7 +2,6 @@ import flet as ft
 from flet import AppBar, Text, View, ElevatedButton
 from flet.core.colors import Colors
 import requests
-from flet.core.dropdown import Option
 from flet.core.types import CrossAxisAlignment
 
 id_usuario_global = 0
@@ -249,15 +248,26 @@ def main(page: ft.Page):
                             input_autor,
                             input_isbn,
                             input_resumo,
-                            ElevatedButton(text="Salvar", on_click=lambda _: atualiza_livro(e),bgcolor="#896d56", color= "#ffffff", width=150),
-                            ElevatedButton(text="Voltar", on_click=lambda _: page.go("/segunda"),bgcolor="#896d56", color= "#ffffff", width=150)
+                            ft.Button(
+                                text="Salvar",
+                                on_click=lambda _: atualiza_livro(e),
+                                bgcolor="#896d56",
+                                color="#ffffff",
+                                width=150,
+                            ),
+                            ft.Button(
+                                text="Voltar",
+                                on_click=lambda _:  page.go("/segunda"),
+                                bgcolor="#896d56",
+                                color="#ffffff",
+                                width=150,
+                        )
 
                     ],
                     bgcolor="#e7c18e",
                     horizontal_alignment=CrossAxisAlignment.CENTER,
                 )
             )
-
         if page.route == "/atualizar_usuario":
             page.views.append(
                 View(
@@ -332,6 +342,12 @@ def main(page: ft.Page):
                                 ft.PopupMenuItem(
                                     text="Informações",
                                     on_click=lambda _, l=livro: detalhes_livro(l)
+
+                                ),
+                                ft.PopupMenuItem(
+                                    text="Atualizar",
+                                    on_click=lambda _, l=livro: popular_livros(l)
+
                                 )
                             ]
                         )
@@ -381,6 +397,7 @@ def main(page: ft.Page):
             dados_get_usuario = usuario_get.json()
             return dados_get_usuario
         else:
+
             print(f"Erro: {usuario_get.status_code}")
             return {
                 "erro": usuario_get.json()
@@ -408,6 +425,10 @@ def main(page: ft.Page):
                                 ft.PopupMenuItem(
                                     text="Informações",
                                     on_click=lambda _, l=usuarios: detalhes_usuario(l)
+                                ),
+                                ft.PopupMenuItem(
+                                    text="Atualizar",
+                                    on_click=lambda _, l=usuarios: popular_usuarios(l)
                                 )
                             ]
                         )
@@ -430,7 +451,7 @@ def main(page: ft.Page):
         else:
             novo_usuario = {
                 "nome" :input_nome.value,
-                "cpf" :input_cpf.value,
+                "CPF" :input_cpf.value,
                 "endereco" :input_endereco.value,
             }
             cadastro_usuarios(novo_usuario)
@@ -439,13 +460,10 @@ def main(page: ft.Page):
         url = "http://10.135.232.24:5000/emprestimos"
         emprestimo_get = requests.get(url)
         if emprestimo_get.status_code == 200:
-            dados_get_emprestimo = emprestimo_get.json()
-            return dados_get_emprestimo
+            dados_emprestimo = emprestimo_get.json()
+            return dados_emprestimo
         else:
-            print(f"Erro: {emprestimo_get.status_code}")
-            return {
-                "erro": emprestimo_get.json()
-            }
+            msg_erro4.open = True
 
     def emprestimos(e):
         lv_emprestimo.controls.clear()
@@ -469,6 +487,10 @@ def main(page: ft.Page):
                                 ft.PopupMenuItem(
                                     text="Informações",
                                     on_click=lambda _, l=emprestimo: detalhes_emprestimo(l)
+                                ),
+                                ft.PopupMenuItem(
+                                    text="Atualizar",
+                                    on_click=lambda _, l=emprestimo: popular_emprestimo(l)
                                 )
                             ]
                         )
@@ -506,13 +528,13 @@ def main(page: ft.Page):
         if response_livro.status_code == 201:
             input_titulo.value = ""
             input_autor.value = ""
-            input_isbn.value = ""
+            int(input_isbn.value)
             input_resumo.value = ""
             page.overlay.append(msg_sucesso1)
             msg_sucesso1.open = True
             page.update()
         else:
-            page.overlay.append(msg_erro2)
+            print(response_livro.status_code)
 
     def cadastro_usuarios(novo_usuario):
         url = "http://10.135.232.24:5000/novo_usuario"
@@ -526,23 +548,30 @@ def main(page: ft.Page):
             msg_sucesso3.open = True
             page.update()
         else:
-            page.overlay.append(msg_erro3)
+            print(response_usuario.status_code)
 
     def realizar_emprestimos(novo_emprestimo):
         url = "http://10.135.232.24:5000/realizar_emprestimo"
-
         response_emprestimo = requests.post(url, json=novo_emprestimo)
+        print(response_emprestimo)
 
-        if response_emprestimo.status_code == 200:
+        if response_emprestimo.status_code == 201:
+            dados_emprestimo = response_emprestimo.json()
+            txt_id_usuario.value = dados_emprestimo["id_usuario"]
+            txt_id_livro.value = dados_emprestimo["id_livro"]
+            txt_data_emprestimo.value = dados_emprestimo["data_emprestimo"]
+            txt_data_devolucao.value = dados_emprestimo["data_devolucao"]
+
+
             input_id_usuario.value = ""
             input_id_livro.value = ""
             input_data_emprestimo.value = ""
             input_data_devolucao.value = ""
             page.overlay.append(msg_sucesso5)
-            msg_sucesso5.open = False
+            msg_sucesso5.open = True
             page.update()
         else:
-            page.overlay.append(msg_erro4)
+            print(response_emprestimo)
 
     def atualiza_livro(e):
         global id_livro_global
@@ -561,7 +590,7 @@ def main(page: ft.Page):
             page.update()
         else:
             return {
-                'error': livros.json()
+                'error': response_put.json()
             }
 
     def atualiza_usuario(e):
@@ -579,10 +608,11 @@ def main(page: ft.Page):
             page.update()
         else:
             return {
-                'error': usuarios.json()
+                'error': response_put.json()
             }
 
     def atualiza_emprestimo(e):
+
         global id_emprestimo_global
         url = f"http://10.135.232.24:5000/atualizar_emprestimos/{id_emprestimo_global}"
         novo_emprestimo = {
@@ -598,8 +628,34 @@ def main(page: ft.Page):
             page.update()
         else:
             return {
-                'error': emprestimos.json()
+                'error': response_put.json()
             }
+
+    def popular_livros(livro):
+        input_titulo.value = livro["Titulo"]
+        input_autor.value = livro["Autor"]
+        input_isbn.value = livro["ISBN"]
+        input_resumo.value = livro["Resumo"]
+        global id_livro_global
+        id_livro_global = livro["id_livro"]
+        page.go("/atualizar_livro")
+
+    def popular_usuarios(usuarios):
+        input_nome.value = usuarios["Nome"]
+        input_cpf.value = usuarios["CPF"]
+        input_endereco.value = usuarios["Endereco"]
+        global id_usuario_global
+        id_usuario_global = usuarios["id_usuario"]
+        page.go("/atualizar_usuario")
+
+    def popular_emprestimo(emprestimo):
+        input_id_usuario.value = emprestimo["id_usuario"]
+        input_id_livro.value = emprestimo["id_livro"]
+        input_data_devolucao.value = emprestimo["Data_devolucao"]
+        input_data_emprestimo.value = emprestimo["Data_emprestimo"]
+        global id_emprestimo_global
+        id_emprestimo_global = emprestimo["id_emprestimo"]
+        page.go("/atualizar_emprestimo")
 
     def status_livro():
         url = "http://10.135.232.24:5000/livro_status"
@@ -656,32 +712,8 @@ def main(page: ft.Page):
 
     input_id_usuario = ft.TextField(label="id_usuario", hint_text="Digite o id do usuario")
     input_id_livro = ft.TextField(label="id_livro", hint_text="Digite o id do livro")
-    input_data_emprestimo = ft.TextField(label="data_emprestimo", hint_text="Digite o data do emprestimo")
-    input_data_devolucao = ft.TextField(label="data_devolucao", hint_text="Digite o data do devolucao")
-    titulo_livro = ft.Dropdown(
-        label='Titulo dos livros',
-        bgcolor="#896d56",
-        width=350,
-        filled=True,
-        fill_color="#e7c18e",
-        options=[
-            Option('Mansao', 'Mansão'),
-            Option('Verao', 'Verão'),
-            Option('amor_gelato', 'Amor e gelato')
-        ],
-    )
-    nomes_usuarios = ft.Dropdown(
-        label='Nome dos usuários',
-        bgcolor="#896d56",
-        width = 350,
-        filled=True,
-        fill_color="#e7c18e",
-        options=[
-            Option('Julia', 'Júlia'),
-            Option('Lucas', 'Lucas'),
-            Option('Leticia', 'Leticia')
-        ],
-    )
+    input_data_emprestimo = ft.TextField(label="data_emprestimo", hint_text="Digite a data de emprestimo")
+    input_data_devolucao = ft.TextField(label="data_devolucao", hint_text="Digite a data de devolucao")
     lv_emprestimo = ft.ListView(
         height=500,
     )
@@ -711,9 +743,8 @@ def main(page: ft.Page):
 
 ft.app(main)
 
-# arrumar options
-# listar emprestimo(nomes pelo id)
 # status
 # historico
-# arrumar cadastrar emprest imo e usuario
-# termina/r atualizar
+#options
+# arrumar cadastrar emprestimo
+# arrumar os atualizar
