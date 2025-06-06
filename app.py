@@ -764,8 +764,8 @@ def main(page: ft.Page):
 
 ft.app(main)
 
+#popular(nome pelo id).
 # status
 # historico
 #options
-# arrumar cadastrar emprestimo
-# arrumar os atualizar
+# arrumar atualizar emprestimo
