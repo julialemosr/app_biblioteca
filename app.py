@@ -117,7 +117,9 @@ def main(page: ft.Page):
                         txt_titulo,
                         txt_autor,
                         txt_isbn,
-                        txt_resumo
+                        txt_resumo,
+                        ElevatedButton(text="Voltar", on_click=lambda _: page.go("/segunda"), bgcolor="#896d56",
+                                       color="#ffffff", width=150)
                     ],
                     bgcolor="#e7c18e",
                 )
@@ -146,6 +148,8 @@ def main(page: ft.Page):
                         txt_nome,
                         txt_cpf,
                         txt_endereco,
+                        ElevatedButton(text="Voltar", on_click=lambda _: page.go("/terceira"), bgcolor="#896d56",
+                                       color="#ffffff", width=150)
                     ],
                     bgcolor="#e7c18e",
                 )
@@ -175,6 +179,8 @@ def main(page: ft.Page):
                         txt_id_livro,
                         txt_data_emprestimo,
                         txt_data_devolucao,
+                        ElevatedButton(text="Voltar", on_click=lambda _: page.go("/quarta"), bgcolor="#896d56",
+                                       color="#ffffff", width=150)
                     ],
                     bgcolor="#e7c18e",
                 )
