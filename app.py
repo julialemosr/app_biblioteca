@@ -16,6 +16,7 @@ def main(page: ft.Page):
     page.window.height = 667
 
 
+
     def gerencia_rotas(e):
         page.views.clear()
         page.views.append(
@@ -454,54 +455,57 @@ def main(page: ft.Page):
             cadastro_usuarios(novo_usuario)
 
     def lista_emprestimos():
-        url = "http://10.135.232.24:5000/emprestimos"
+        url = "http://10.135.232.24:5001/emprestimos"
         emprestimo_get = requests.get(url)
         if emprestimo_get.status_code == 200:
             dados_emprestimo = emprestimo_get.json()
-            return dados_emprestimo
+            # print("aqui", dados_emprestimo)
+            return dados_emprestimo["lista_emprestimos"]
         else:
-            msg_erro4.open = True
+            return emprestimo_get.json()
 
     def emprestimos(e):
         lv_emprestimo.controls.clear()
         lista_resultados = lista_emprestimos()
         print(lista_resultados)
 
-        if "error" in lista_resultados:
-            print("Erro: ", lista_resultados)
-        else:
-            print(lista_resultados)
-
-            for emprestimo in lista_resultados['lista_emprestimos']:
-                print("aa", lista_resultados)
-                lv_emprestimo.controls.append(
-                    ft.ListTile(
-                        leading=ft.Icon(ft.Icons.BOOK),
-                        title=ft.Text(f"Data de emprestimo: {emprestimo["Data_emprestimo"]}"),
-                        trailing=ft.PopupMenuButton(
-                            icon=ft.Icons.REMOVE_RED_EYE,
-                            items=[
-                                ft.PopupMenuItem(
-                                    text="Informações",
-                                    on_click=lambda _, l=emprestimo: detalhes_emprestimo(l)
-                                ),
-                                ft.PopupMenuItem(
-                                    text="Atualizar",
-                                    on_click=lambda _, l=emprestimo: popular_emprestimo(l)
-                                )
-                            ]
-                        )
+        for emprestimo in lista_resultados:
+            print("aa", lista_resultados)
+            lv_emprestimo.controls.append(
+                ft.ListTile(
+                    leading=ft.Icon(ft.Icons.BOOK),
+                    title=ft.Text(f"Data de emprestimo: {emprestimo["Data_emprestimo"]}"),
+                    trailing=ft.PopupMenuButton(
+                        icon=ft.Icons.REMOVE_RED_EYE,
+                        items=[
+                            ft.PopupMenuItem(
+                                text="Informações",
+                                on_click=lambda _, l=emprestimo: detalhes_emprestimo(l)
+                            ),
+                            ft.PopupMenuItem(
+                                text="Atualizar",
+                                on_click=lambda _, l=emprestimo: popular_emprestimo(l)
+                            )
+                        ]
                     )
                 )
-        page.update()
+            )
 
-    def detalhes_emprestimo(emprestimos):
-        txt_id_usuario.value = emprestimos["id_usuario"]
-        txt_id_livro.value = emprestimos["id_livro"]
-        txt_data_emprestimo.value = emprestimos["Data_emprestimo"]
-        txt_data_devolucao.value = emprestimos["Data_devolucao"]
-        page.update()
-        page.go("/detalhes_emprestimo")
+    def detalhes_emprestimo(emprestimo):
+        url_livro = f"http://10.135.232.24:5001/exibir_livro/{emprestimo['id_livro']}"
+        url_usuario = f"http://10.135.232.24:5001/exibir_usuario/{emprestimo['id_usuario']}"
+        get_livro = requests.get(url_livro)
+        get_usuario = requests.get(url_usuario)
+
+        if get_livro.status_code and get_usuario.status_code == 200:
+            dados_livro = get_livro.json()
+            dados_usuario = get_usuario.json()
+            txt_id_usuario.value = dados_usuario["Nome"]
+            txt_id_livro.value = dados_livro["Titulo"]
+            txt_data_emprestimo.value = f"Data de empréstimo: {emprestimo["Data_emprestimo"]}"
+            txt_data_devolucao.value = f"Data de devolução: {emprestimo["Data_devolucao"]}"
+            page.update()
+            page.go("/detalhes_emprestimo")
 
     def salvar_emprestimo(e):
         if input_id_usuario.value == "" or input_id_livro.value == "" or input_data_emprestimo.value == "" or input_data_devolucao.value == "":
@@ -510,13 +514,12 @@ def main(page: ft.Page):
             page.update()
         else:
             novo_emprestimo = {
-                "id_usuario" :input_id_usuario.value,
-                "id_livro" :input_id_livro.value,
+                "id_usuario" : int(input_id_usuario.value),
+                "id_livro" : int(input_id_livro.value),
                 "data_emprestimo" :input_data_emprestimo.value,
                 "data_devolucao" :input_data_devolucao.value,
             }
             realizar_emprestimos(novo_emprestimo)
-            page.update()
 
     def cadastro_livros(novo_livro):
         url = "http://10.135.232.24:5000/novo_livro"
@@ -621,7 +624,7 @@ def main(page: ft.Page):
 
     def atualiza_emprestimo(e):
         global id_emprestimo_global
-        url = f"http://10.135.232.24:5000/atualizar_emprestimos/{id_emprestimo_global}"
+        url = f"http://10.135.232.24:500/atualizar_emprestimos/{id_emprestimo_global}"
         novo_emprestimo = {
             "id_livro": input_id_livro.value,
             "id_usuario": input_id_usuario.value,
@@ -727,14 +730,14 @@ def main(page: ft.Page):
     input_id_livro = ft.TextField(label="id_livro", hint_text="Digite o id do livro")
     input_data_emprestimo = ft.TextField(label="data_emprestimo", hint_text="Digite a data de emprestimo")
     input_data_devolucao = ft.TextField(label="data_devolucao", hint_text="Digite a data de devolucao")
-    #resultado_livros = lista_livros()
-    # options = [Option(key= livros["id_livro"], text= livros["titulo"]) for livros in resultado_livros]
-    # input_livro_id = ft.Dropdown(
-    #     bgcolor=Colors.BLACK,
-    #     label="ID do livro",
-    #     width= page.window.width,
-    #     options=options,
-    # )
+    resultado_livros = lista_livros()
+    options = [Option(key= livros["id_livro"], text= livros["Titulo"]) for livros in resultado_livros]
+    input_livro_id = ft.Dropdown(
+         bgcolor=Colors.BLACK,
+         label="ID do livro",
+         width= page.window.width,
+         options=options,
+     )
     lv_emprestimo = ft.ListView(
         height=500,
     )
@@ -764,9 +767,7 @@ def main(page: ft.Page):
 
 ft.app(main)
 
-#popular(nome pelo id).
 # status
 # historico
 #options
 # arrumar atualizar emprestimo
-#dropdow

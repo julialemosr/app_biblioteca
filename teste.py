@@ -1,11 +1,14 @@
 import requests
-def lista_livros():
-    url = "http://10.135.232.24:5000/livros"
-    livro_get = requests.get(url)
-    if livro_get.status_code == 200:
-        dados_get_livro = livro_get.json()
-        return dados_get_livro
-    else:
-        f"Erro: {livro_get.status_code}"
 
-lista_livros()
+
+def lista_emprestimos():
+    url = "http://10.135.232.24:5001/emprestimos"
+    emprestimo_get = requests.get(url)
+    if emprestimo_get.status_code == 200:
+        dados_emprestimo = emprestimo_get.json()
+        print("aqui", dados_emprestimo)
+        # return dados_emprestimo["emprestimos"]
+    else:
+        print("erro de emprestimo")
+
+lista_emprestimos()
