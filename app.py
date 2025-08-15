@@ -307,7 +307,7 @@ def main(page: ft.Page):
         page.update()
 
     def get_lista_livros():
-        url = "http://10.135.232.24:5000/livros"
+        url = "http://10.135.235.63:5001/livros"
         livro_get = requests.get(url)
         if livro_get.status_code == 200:
             dados_get_livro = livro_get.json()
@@ -354,7 +354,7 @@ def main(page: ft.Page):
         page.update()
 
     def lista_livros():
-        url = "http://10.135.232.24:5000/livros"
+        url = "http://10.135.235.63:5001/livros"
         livros_get = requests.get(url)
         if livros_get.status_code == 200:
             dados_get_livros = livros_get.json()
@@ -389,7 +389,7 @@ def main(page: ft.Page):
             cadastro_livros(novo_livro)
 
     def lista_usuarios():
-        url = "http://10.135.232.24:5000/usuarios"
+        url = "http://10.135.235.63:5001/usuarios"
         usuario_get = requests.get(url)
         if usuario_get.status_code == 200:
             dados_get_usuario = usuario_get.json()
@@ -455,7 +455,7 @@ def main(page: ft.Page):
             cadastro_usuarios(novo_usuario)
 
     def lista_emprestimos():
-        url = "http://10.135.232.24:5001/emprestimos"
+        url = "http://10.135.235.63:5001/emprestimos"
         emprestimo_get = requests.get(url)
         if emprestimo_get.status_code == 200:
             dados_emprestimo = emprestimo_get.json()
@@ -492,8 +492,8 @@ def main(page: ft.Page):
             )
 
     def detalhes_emprestimo(emprestimo):
-        url_livro = f"http://10.135.232.24:5001/exibir_livro/{emprestimo['id_livro']}"
-        url_usuario = f"http://10.135.232.24:5001/exibir_usuario/{emprestimo['id_usuario']}"
+        url_livro = f"http://10.135.235.63:5001/exibir_livro/{emprestimo['id_livro']}"
+        url_usuario = f"http://10.135.235.63:5001/exibir_usuario/{emprestimo['id_usuario']}"
         get_livro = requests.get(url_livro)
         get_usuario = requests.get(url_usuario)
 
@@ -522,7 +522,7 @@ def main(page: ft.Page):
             realizar_emprestimos(novo_emprestimo)
 
     def cadastro_livros(novo_livro):
-        url = "http://10.135.232.24:5000/novo_livro"
+        url = "http://10.135.235.63:5001/novo_livro"
         response_livro = requests.post(url, json=novo_livro)
 
         if response_livro.status_code == 201:
@@ -537,7 +537,7 @@ def main(page: ft.Page):
             print(response_livro.status_code)
 
     def cadastro_usuarios(novo_usuario):
-        url = "http://10.135.232.24:5000/novo_usuario"
+        url = "http://10.135.235.63:5001/novo_usuario"
         response_usuario = requests.post(url, json=novo_usuario)
 
         if response_usuario.status_code == 201:
@@ -551,7 +551,7 @@ def main(page: ft.Page):
             print(response_usuario.status_code)
 
     def realizar_emprestimos(novo_emprestimo):
-        url = "http://10.135.232.24:5000/realizar_emprestimo"
+        url = "http://10.135.235.63:5001/realizar_emprestimo"
         response_emprestimo = requests.post(url, json=novo_emprestimo)
         print(response_emprestimo)
 
@@ -575,7 +575,7 @@ def main(page: ft.Page):
 
     def atualiza_livro(e):
         global id_livro_global
-        url = f"http://10.135.232.24:5000/atualizar_livro/{id_livro_global}"
+        url = f"http://10.135.235.63:5001/atualizar_livro/{id_livro_global}"
 
         novo_livro = {
             "Titulo": input_titulo.value,
@@ -601,7 +601,7 @@ def main(page: ft.Page):
 
     def atualiza_usuario(e):
         global id_usuario_global
-        url = f"http://10.135.232.24:5000/atualizar_usuario/{id_usuario_global}"
+        url = f"http://10.135.235.63:5001/atualizar_usuario/{id_usuario_global}"
         novo_usuario = {
             "Nome": input_nome.value,
             "CPF": input_cpf.value,
@@ -624,7 +624,7 @@ def main(page: ft.Page):
 
     def atualiza_emprestimo(e):
         global id_emprestimo_global
-        url = f"http://10.135.232.24:500/atualizar_emprestimos/{id_emprestimo_global}"
+        url = f"http://10.135.235.63:5001/atualizar_emprestimos/{id_emprestimo_global}"
         novo_emprestimo = {
             "id_livro": input_id_livro.value,
             "id_usuario": input_id_usuario.value,
@@ -674,7 +674,7 @@ def main(page: ft.Page):
         page.go("/atualizar_emprestimo")
 
     def status_livro():
-        url = "http://10.135.232.24:5000/livro_status"
+        url = "http://10.135.235.63:5001/livro_status"
         status_get = requests.get(url)
         if status_get.status_code == 200:
             dados_get_livro = status_get.json()
@@ -684,7 +684,7 @@ def main(page: ft.Page):
             print(f"Erro: {status_get.status_code}")
 
     def historico_emprestimo():
-        url = "http://10.135.232.24:5000/consulta_historico_emprestimo"
+        url = "http://10.135.235.63:5001/consulta_historico_emprestimo"
         historico_emprestimo_get = requests.get(url)
         if historico_emprestimo_get.status_code == 200:
             dados_get_livro = historico_emprestimo_get.json()
@@ -730,14 +730,14 @@ def main(page: ft.Page):
     input_id_livro = ft.TextField(label="id_livro", hint_text="Digite o id do livro")
     input_data_emprestimo = ft.TextField(label="data_emprestimo", hint_text="Digite a data de emprestimo")
     input_data_devolucao = ft.TextField(label="data_devolucao", hint_text="Digite a data de devolucao")
-    resultado_livros = lista_livros()
-    options = [Option(key= livros["id_livro"], text= livros["Titulo"]) for livros in resultado_livros]
-    input_livro_id = ft.Dropdown(
-         bgcolor=Colors.BLACK,
-         label="ID do livro",
-         width= page.window.width,
-         options=options,
-     )
+    # resultado_livros = lista_livros()
+    # options = [Option(key= livros["id_livro"], text= livros["Titulo"]) for livros in resultado_livros]
+    # input_livro_id = ft.Dropdown(
+    #      bgcolor=Colors.BLACK,
+    #      label="ID do livro",
+    #      width= page.window.width,
+    #      options=options,
+    #  )
     lv_emprestimo = ft.ListView(
         height=500,
     )
